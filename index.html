@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+    <html>
+        <head> 
+            <meta charset="utf-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
+            <title>Restaurant Recommendation</title>
+            <link rel="stylesheet" href="/assets/bootstrap/css/bootstrap.min.css">
+            <link rel="stylesheet" href="/assets/css/Articles-Cards.css">
+            <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.5.2/animate.min.css">
+            <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.css">
+            <link rel="stylesheet" href="/assets/css/styles.css">
+        </head>
+        <body class="text-monospace">
+            <form id="form1" method="post" onsubmit="LoadMap()" style="padding: 5px;margin: -1px;">
+                <header></header>
+                <div class="form-group text-monospace font-weight-bold">
+                    <h1 style="font-size: 30px;text-align: center;color: var(--white);font-weight: bold;background: var(--gray);">YELP BASED RESTAURANT RECOMMENDATIONS</h1>
+                    <div class="table-responsive" style="overflow-x: hidden;">
+                        <table class="table">                        
+                            <thead>
+                                <tr>
+                                    <th>
+                                        <h1 style="font-size: 20px;color: var(--black);text-align: center;">Location:
+                                        </h1>
+                                    </th>
+                                    <th>                                        
+                                        <input class="form-control" type="text" name="location", for="location" placeholder="Enter Location">
+                                    </th>
+                                    <th class="text-center">
+                                        <input style="" type="submit" value="Search for restaurants">
+                                    </th>
+                                </tr>
+                            </thead>
+                            
+                            <tbody>
+                                <tr></tr>
+                                <tr></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </form>
+            <div class="table-responsive">
+                <table class="table">
+                    <thead>
+                        <tr></tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>
+                                <div id="map" style="width: 100%; height: 600px;"></div>
+                                <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyB4jChq2-_I4Dc0KSh3VI_OCaCDcG68oq8&callback=initMap&v=weekly" width="100%" height="800" allowfullscreen
+                                type="text/javascript"></script>
+                            </td>
+                            <td style="width: 270.781px;overflow-x: auto;">
+                                <form data-aos="fade" style="width: 248.781px;height: 409px;color: var(--info);padding-top: 19px;">
+                                    <h1 style="font-size: 25px;color: var(--blue);">Restaurants and Recommended Items</h1>
+                                    {% for todo in todos %}
+                                        <div class="card">
+                                            <div class="card-body"  style="margin: 8px;">
+                                                <h4 class="card-title" style="color: var(--indigo);">
+                                                    <a id="res1" href="#" style="color: var(--red);">{{todo['res_name']}}</a>
+                                                </h4>
+                                                {% for food in todo['best_foods'] %}
+                                                <p class="card-text" id="item1" style="color: var(--info);">{{food}}</p>
+                                                {% endfor %}
+                                            </div>
+                                        </div>
+                            
+                                    {% endfor %}
+
+                                </form>
+                            </td>
+                        </tr>
+                        <tr></tr>
+                    </tbody>
+                </table>
+            </div>         
+
+  <script type="text/javascript">
+                //Array of JSON objects.
+                const markers = [];
+                {% for todo in todos %}
+                    var temp = {
+                    "res_name" : "{{ todo['res_name'] }}",
+                    "latitude" : "{{ todo['latitude'] }}",
+                    "longitude" : "{{ todo['longitude'] }}",
+                    "best_foods" : "{{ todo['best_foods'] }}"
+                    };
+                    markers.push(temp);
+                {% endfor %}
+                window.onload = function () {
+                    LoadMap();
+                }
+                function LoadMap() {
+                    var mapOptions = {
+                        center: new google.maps.LatLng(markers[0].latitude, markers[0].longitude),
+                        zoom: 8,
+                        mapTypeId: google.maps.MapTypeId.ROADMAP
+                    };
+                    var infoWindow = new google.maps.InfoWindow();
+                    var latlngbounds = new google.maps.LatLngBounds();
+                    var map = new google.maps.Map(document.getElementById("map"), mapOptions);
+                    console.log(markers);
+                    for (var i = 0; i < markers.length; i++) {
+                        var data = markers[i]
+                        var myLatlng = new google.maps.LatLng(data.latitude, data.longitude);
+                        console.log(myLatlng);
+                        var marker = new google.maps.Marker({
+                            position: myLatlng,
+                            map: map,
+                            title: data.res_name
+                        });
+                        
+                        (function (marker, data) {
+                            google.maps.event.addListener(marker, "click", function (e) {
+                                infoWindow.setContent("<div style = 'width:200px;min-height:40px'>" + data.res_name + "</div>");
+                                infoWindow.open(map, marker);
+                            });
+                        })(marker, data);
+                        latlngbounds.extend(marker.position);
+                    }
+                    var bounds = new google.maps.LatLngBounds();
+                    map.setCenter(latlngbounds.getCenter());
+                    map.fitBounds(latlngbounds);
+                }
+                // document.getElementById("res1").innerHTML = markers[0].title;
+                // document.getElementById("item1").innerHTML = markers[0].description;
+                // document.getElementById("res2").innerHTML = markers[1].title;
+                // document.getElementById("item2").innerHTML = markers[1].description;
+                // document.getElementById("res3").innerHTML = markers[2].title;
+                // document.getElementById("item3").innerHTML = markers[2].description;
+            </script>
+            <footer class="page-footer"></footer>
+            <script src="assets/js/jquery.min.js"></script>
+            <script src="assets/bootstrap/js/bootstrap.min.js"></script>
+            <script src="assets/js/bs-init.js"></script>
+            <script src="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.js"></script>
+            <script src="assets/js/untitled.js"></script>
+        </body>
+    </html>
